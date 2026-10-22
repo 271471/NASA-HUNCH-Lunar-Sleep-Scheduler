@@ -37,7 +37,11 @@ function genSS(currentBedtime, targetBedtime, sleepHours, shiftDirection){
         return "The shift direction provided is invalid, please ensure that you have either inputed 'later' or 'earlier'."
     }
 
-    let maxShift = 120; //
+    let maxShift = 120; //Max ammount of shifts per sleep periods
+    let days = Math.ceil(diff / maxShift);
+    for (let day = 1; day <= days; day++) {
+        let shiftAmmount = Math.min(maxShift)
+    }
 }
 let x = timetomins("8:05");
 console.log(x);
