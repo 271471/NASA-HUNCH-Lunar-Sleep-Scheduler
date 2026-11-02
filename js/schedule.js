@@ -37,7 +37,6 @@ function timetomins(time) {
     let days = Math.ceil(diff / maxShift);
     let remaining = diff;
   
-    let baseDayOffset = Math.floor(current / 1440);
   
     schedule.push({
       day: 0,
@@ -51,6 +50,7 @@ function timetomins(time) {
     });
   
     let accumMinutes = current;
+    let elapsedDays = 0;
   
     for (let day = 1; day <= days; day++) {
       let shiftAmount = Math.min(maxShift, remaining);
@@ -63,9 +63,10 @@ function timetomins(time) {
   
       let bedtime = minstotime(accumMinutes);
       let wakeTime = minstotime(accumMinutes + sleepDuration);
-      let bedtimeAbsolute = day * 1440 + accumMinutes;
+      let bedtimeAbsolute = 1440 + elapsedDays + accumMinutes - current;
       let wakeAbsolute = bedtimeAbsolute + sleepDuration;
-  
+      elapsedDays += 1440;
+
       schedule.push({
         day: day,
         bedtime: bedtime,
