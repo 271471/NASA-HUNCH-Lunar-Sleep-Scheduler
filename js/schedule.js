@@ -49,33 +49,36 @@ function genSS(currentBedtime, targetBedtime, sleepHours, shiftDirection, maxShi
     wakeAbsolute: current + sleepDuration
   });
 
-  let bedtimeAbsolute = day * 1440 + accumMinutes;
+    let accumMinutes = current;
 
-  for (let day = 1; day <= days; day++) {
-    let shiftAmount = Math.min(maxShift, remaining);
-    if (shiftDirection === 'later') {
-      accumMinutes += shiftAmount;
-    } else {
-      accumMinutes -= shiftAmount;
+    for (let day = 1; day <= days; day++) {
+      let shiftAmount = Math.min(maxShift, remaining);
+
+      if (shiftDirection === 'later') {
+        accumMinutes += shiftAmount;
+      } else {
+        accumMinutes -= shiftAmount;
+      }
+
+      remaining -= shiftAmount;
+
+      let bedtime = minstotime(accumMinutes);
+      let wakeTime = minstotime(accumMinutes + sleepDuration);
+
+      let bedtimeAbsolute = day * 1440 + accumMinutes;
+      let wakeAbsolute = bedtimeAbsolute + sleepDuration;
+
+      schedule.push({
+        day: day,
+        bedtime: bedtime,
+        wakeTime: wakeTime,
+        bedtimeAbsolute: bedtimeAbsolute,
+        wakeAbsolute: wakeAbsolute,
+        bedtimeDayOffset: Math.floor(bedtimeAbsolute / 1440),
+        wakeDayOffset: Math.floor(wakeAbsolute / 1440),
+        shiftMinutes: shiftAmount
+      });
     }
-    remaining -= shiftAmount;
-
-    let bedtime = minstotime(accumMinutes);
-    let wakeTime = minstotime(accumMinutes + sleepDuration);
-    let bedtimeAbsolute = 1440 + elapsedDays + accumMinutes - current;
-    let wakeAbsolute = bedtimeAbsolute + sleepDuration;
-
-    schedule.push({
-      day: day,
-      bedtime: bedtime,
-      wakeTime: wakeTime,
-      bedtimeAbsolute: bedtimeAbsolute,
-      wakeAbsolute: wakeAbsolute,
-      bedtimeDayOffset: Math.floor(bedtimeAbsolute / 1440),
-      wakeDayOffset: Math.floor(wakeAbsolute / 1440),
-      shiftMinutes: shiftAmount
-    });
-  }
 
   return schedule;
 }
