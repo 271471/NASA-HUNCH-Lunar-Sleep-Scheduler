@@ -7,11 +7,15 @@ generateButton.addEventListener('click', function() {
     const targetBedtime = document.getElementById('targetBedtime').value;
     const sleepHours = Number(document.getElementById('sleepHours').value);
     const shiftDirection = document.getElementById('shiftDirection').value;
+    console.log("Current bedtime:", JSON.stringify(currentBedtime));
+    console.log("Target bedtime:", JSON.stringify(targetBedtime));
+
 
     try {
         if (!currentBedtime || !targetBedtime || !document.getElementById('sleepHours').value) {
             throw new Error('Please complete all fields.');
         }
+        
 
         const schedule = genSS(
             currentBedtime,

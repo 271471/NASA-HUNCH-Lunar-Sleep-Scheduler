@@ -1,0 +1,14 @@
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th, td {
+    border: 1px solid black;
+    padding: 10px;
+    text-align: center;
+}
+
+.linear-basic {
+  background: linear-gradient(to right, rgb(134, 38, 189), rgb(1, 12, 114));
+}
