@@ -10,5 +10,20 @@ th, td {
 }
 
 .linear-basic {
-  background: linear-gradient(to right, rgb(134, 38, 189), rgb(1, 12, 114));
+  background: linear-gradient(to right, rgb(184, 129, 215), rgb(134, 142, 219));
+}
+
+input,
+select {
+    background-color: rgb(246, 246, 246);
+    border: 1px solid #7424f6;
+    border-radius: 4px;
+}
+body {
+    font-family: Arial, sans-serif; /* body and other text */
+}
+
+.title {
+    font-family: "Nasalization", sans-serif;
+    text-align: center;
 }
