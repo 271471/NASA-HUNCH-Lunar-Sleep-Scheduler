@@ -1,7 +1,10 @@
 
-
 const generateButton = document.getElementById('generateButton');
 const scheduleOutput = document.getElementById('scheduleOutput');
+
+// daily sleep report button
+const showSleepReportButton = document.getElementById('showSleepReportButton');
+const sleepReport = document.getElementById('sleepReport');
 
 generateButton.addEventListener('click', function() { // schedule generate
 
@@ -24,6 +27,9 @@ generateButton.addEventListener('click', function() { // schedule generate
         );
 
         displaySchedule(schedule, shiftDirection);
+
+        // Show the daily report button after generating a schedule
+        showSleepReportButton.hidden = false;
 
     } catch (error) {
         scheduleOutput.textContent = error.message;
@@ -81,7 +87,13 @@ function displaySchedule(schedule, shiftDirection) {
     });
 
     scheduleOutput.appendChild(table);
-}
+});
+
+
+// Open daily sleep report when button is clicked
+showSleepReportButton.addEventListener('click', function() {
+    sleepReport.hidden = false;
+});
 
 
 // daily sleep
