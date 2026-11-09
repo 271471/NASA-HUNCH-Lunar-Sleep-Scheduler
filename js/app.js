@@ -14,9 +14,6 @@ let currentSchedule = [];
 let currentShiftDirection = '';
 
 
-// ==========================================
-// SCHEDULE GENERATION
-// ==========================================
 
 generateButton.addEventListener('click', generateSchedule); // schedule generate
 
@@ -110,9 +107,7 @@ function displaySchedule(schedule, shiftDirection) {
 }
 
 
-// ==========================================
-// DAILY SLEEP REPORT VISIBILITY
-// ==========================================
+
 
 // Open daily sleep report when button is clicked
 showSleepReportButton.addEventListener('click', function() {
@@ -120,9 +115,6 @@ showSleepReportButton.addEventListener('click', function() {
 });
 
 
-// ==========================================
-// DAILY SLEEP REPORT
-// ==========================================
 
 const sleepDate = document.getElementById('sleepDate');
 const actualBedtime = document.getElementById('actualBedtime');
@@ -244,9 +236,6 @@ saveSleepReportButton.addEventListener('click', function() { // trys report
 });
 
 
-// ==========================================
-// 12-HOUR TO 24-HOUR CONVERTER
-// ==========================================
 
 const convertTimeButton = document.getElementById('convertTimeButton');
 const time24Output = document.getElementById('time24Output');
@@ -281,9 +270,6 @@ convertTimeButton.addEventListener('click', function() {
 });
 
 
-// ==========================================
-// SCHEDULE TXT EXPORT
-// ==========================================
 
 exportScheduleButton.addEventListener('click', function() {
 
