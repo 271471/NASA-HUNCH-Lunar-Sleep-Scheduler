@@ -47,9 +47,51 @@
                 Your schedule will appear here.
             </div>
         </section>
+
+        <section id="sleepReport">
+            <h2>Daily Sleep Report</h2>
+
+            <p>
+                Record your actual sleep times and sleep quality
+                to help Genesis evaluate your sleep history.
+            </p>
+
+            <label for="sleepDate">Sleep Date</label>
+            <input type="date" id="sleepDate" required>
+
+            <label for="actualBedtime">Actual Bedtime</label>
+            <input type="text" id="actualBedtime"
+                   placeholder="21:30" required>
+
+            <label for="actualWakeTime">Actual Wake Time</label>
+            <input type="text" id="actualWakeTime"
+                   placeholder="06:00" required>
+
+            <label for="sleepQuality">Sleep Quality</label>
+            <select id="sleepQuality" required>
+                <option value="">Select sleep quality</option>
+                <option value="poor">Poor</option>
+                <option value="okay">Okay</option>
+                <option value="great">Great</option>
+            </select>
+
+            <label for="sleepNotes">Additional Notes (Optional)</label>
+            <textarea id="sleepNotes"
+                      placeholder="Record interruptions or other relevant observations."
+                      rows="3"></textarea>
+
+            <button type="button" id="saveSleepReportButton">
+                Save Sleep Report
+            </button>
+
+            <div id="sleepReportStatus" aria-live="polite">
+            </div>
+
+        </section>
     </main>
 
     <script src="js/schedule.js"></script>
+    <script src="js/storage.js"></script>
     <script src="js/app.js"></script>
 
     <script>
