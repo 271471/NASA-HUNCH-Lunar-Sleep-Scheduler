@@ -1,14 +1,29 @@
 
 const generateButton = document.getElementById('generateButton');
 const scheduleOutput = document.getElementById('scheduleOutput');
+const currentBedtimeInput = document.getElementById('currentBedtime');
 
 // daily sleep report button
 const showSleepReportButton = document.getElementById('showSleepReportButton');
 const sleepReport = document.getElementById('sleepReport');
 
-generateButton.addEventListener('click', function() { // schedule generate
+// schedule export
+const exportScheduleButton = document.getElementById('exportScheduleButton');
 
-    const currentBedtime = document.getElementById('currentBedtime').value;
+let currentSchedule = [];
+let currentShiftDirection = '';
+
+
+// ==========================================
+// SCHEDULE GENERATION
+// ==========================================
+
+generateButton.addEventListener('click', generateSchedule); // schedule generate
+
+
+function generateSchedule() {
+
+    const currentBedtime = currentBedtimeInput.value;
     const targetBedtime = document.getElementById('targetBedtime').value;
     const sleepHours = Number(document.getElementById('sleepHours').value);
     const shiftDirection = document.getElementById('shiftDirection').value;
@@ -28,13 +43,18 @@ generateButton.addEventListener('click', function() { // schedule generate
 
         displaySchedule(schedule, shiftDirection);
 
-        // Show the daily report button after generating a schedule
+        currentSchedule = schedule;
+        currentShiftDirection = shiftDirection;
+
+        // Show the daily report and export buttons after generating a schedule
         showSleepReportButton.hidden = false;
+        exportScheduleButton.hidden = false;
 
     } catch (error) {
         scheduleOutput.textContent = error.message;
+        exportScheduleButton.hidden = true;
     }
-});
+}
 
 
 function displaySchedule(schedule, shiftDirection) {
@@ -90,18 +110,24 @@ function displaySchedule(schedule, shiftDirection) {
 }
 
 
+// ==========================================
+// DAILY SLEEP REPORT VISIBILITY
+// ==========================================
+
 // Open daily sleep report when button is clicked
 showSleepReportButton.addEventListener('click', function() {
     sleepReport.hidden = false;
 });
 
 
-// daily sleep
+// ==========================================
+// DAILY SLEEP REPORT
+// ==========================================
+
 const sleepDate = document.getElementById('sleepDate');
 const actualBedtime = document.getElementById('actualBedtime');
 const actualWakeTime = document.getElementById('actualWakeTime');
 const sleepQuality = document.getElementById('sleepQuality');
-const sleepNotes = document.getElementById('sleepNotes');
 
 const saveSleepReportButton =
     document.getElementById('saveSleepReportButton');
@@ -124,12 +150,34 @@ function getLocalDate() { //this will change later, but I would need to make a s
 sleepDate.value = getLocalDate();
 
 
+// Use the most recent sleep report as the next starting bedtime
+function loadLatestSleepReport() {
+
+    const logs = getSleepLogs();
+
+    if (logs.length === 0) {
+        return;
+    }
+
+    logs.sort(function(a, b) {
+        return b.date.localeCompare(a.date);
+    });
+
+    if (logs[0].bedtime) {
+        currentBedtimeInput.value = logs[0].bedtime;
+    }
+}
+
+loadLatestSleepReport();
+
+
 function validateTime(time) { //validates 24 hour format
 
     return /^([01]?\d|2[0-3]):[0-5]\d$/.test(time); //do not remember this look up regex (regular expression).
 }
 
 
+// Save nightly sleep report
 saveSleepReportButton.addEventListener('click', function() { // trys report
 
     try {
@@ -138,7 +186,6 @@ saveSleepReportButton.addEventListener('click', function() { // trys report
         const bedtime = actualBedtime.value.trim();
         const wakeTime = actualWakeTime.value.trim();
         const quality = sleepQuality.value;
-        const notes = sleepNotes.value.trim();
 
         if (!date || !bedtime || !wakeTime || !quality) {
             throw new Error('Please complete all required fields.');
@@ -168,26 +215,120 @@ saveSleepReportButton.addEventListener('click', function() { // trys report
             wakeTime: wakeTime,
             duration: duration,
             quality: quality,
-            notes: notes,
             loggedAt: new Date().toISOString()
         };
 
         saveSleepLog(report);
 
+        // Update the starting bedtime using the actual report
+        currentBedtimeInput.value = bedtime;
+
+        // Regenerate the schedule using the updated bedtime
+        generateSchedule();
+
         // Display confirmation
         sleepReportStatus.textContent =
-            `Sleep report saved successfully. Actual sleep: ${duration.toFixed(2)} hours.`;
+            `Report saved. Actual sleep: ${duration.toFixed(2)} hours. Schedule updated using your reported bedtime.`;
 
         // Clear report fields for the next entry
         actualBedtime.value = '';
         actualWakeTime.value = '';
         sleepQuality.value = '';
-        sleepNotes.value = '';
 
     } catch (error) {
 
         sleepReportStatus.textContent = error.message;
 
     }
+
+});
+
+
+// ==========================================
+// 12-HOUR TO 24-HOUR CONVERTER
+// ==========================================
+
+const convertTimeButton = document.getElementById('convertTimeButton');
+const time24Output = document.getElementById('time24Output');
+
+convertTimeButton.addEventListener('click', function() {
+
+    const hour = Number(document.getElementById('timeHour').value);
+    const minute = Number(document.getElementById('timeMinute').value);
+    const period = document.getElementById('timePeriod').value;
+
+    if (
+        !Number.isInteger(hour) || hour < 1 || hour > 12 ||
+        !Number.isInteger(minute) || minute < 0 || minute > 59
+    ) {
+        time24Output.textContent = 'Enter a valid hour and minute.';
+        return;
+    }
+
+    let hour24 = hour;
+
+    if (period === 'AM') {
+        hour24 = hour % 12;
+    } else {
+        hour24 = (hour % 12) + 12;
+    }
+
+    const convertedTime =
+        `${String(hour24).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+
+    time24Output.textContent = `24-hour time: ${convertedTime}`;
+
+});
+
+
+// ==========================================
+// SCHEDULE TXT EXPORT
+// ==========================================
+
+exportScheduleButton.addEventListener('click', function() {
+
+    if (currentSchedule.length === 0) {
+        return;
+    }
+
+    let text = 'GENESIS - LUNAR SLEEP SCHEDULE\n';
+    text += '================================\n\n';
+
+    text += `Generated: ${getLocalDate()}\n`;
+    text += `Shift Direction: ${currentShiftDirection}\n\n`;
+
+    currentSchedule.forEach(function(period) {
+
+        text += `Sleep Period ${period.day}\n`;
+        text += `Bedtime: ${period.bedtime}\n`;
+        text += `Wake Time: ${period.wakeTime}\n`;
+        text += `Bedtime Day: Day +${period.bedtimeDayOffset}\n`;
+        text += `Wake Day: Day +${period.wakeDayOffset}\n`;
+
+        if (period.day === 0) {
+            text += 'Shift: Starting schedule\n';
+        } else {
+            text += `Shift: ${period.shiftMinutes} minutes ${currentShiftDirection}\n`;
+        }
+
+        text += '\n';
+    });
+
+    const file = new Blob([text], {
+        type: 'text/plain;charset=utf-8'
+    });
+
+    const fileURL = URL.createObjectURL(file);
+
+    const downloadLink = document.createElement('a');
+
+    downloadLink.href = fileURL;
+    downloadLink.download = `Genesis_Sleep_Schedule_${getLocalDate()}.txt`;
+
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+
+    URL.revokeObjectURL(fileURL);
 
 });
