@@ -10,7 +10,7 @@ th, td {
 }
 
 .linear-basic {
-  background: linear-gradient(to right, rgb(184, 129, 215), rgb(134, 142, 219));
+  background: linear-gradient(to top, rgb(255, 0, 255), rgb(218, 112, 214));
 }
 
 input,
