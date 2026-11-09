@@ -87,7 +87,7 @@ function displaySchedule(schedule, shiftDirection) {
     });
 
     scheduleOutput.appendChild(table);
-});
+}
 
 
 // Open daily sleep report when button is clicked
