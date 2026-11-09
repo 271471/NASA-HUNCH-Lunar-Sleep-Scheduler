@@ -27,3 +27,7 @@ body {
     font-family: "Nasalization", sans-serif;
     text-align: center;
 }
+
+[hidden] {
+    display: none !important;
+}
