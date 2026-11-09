@@ -19,6 +19,7 @@
     </header>
 
     <main>
+        <!-- Sleep Schedule Configuration -->
         <section id="scheduler">
             <h2>Sleep Schedule Configuration</h2>
 
@@ -38,9 +39,39 @@
                 <option value="earlier">Earlier</option>
             </select>
 
-            <button id="generateButton">Generate Schedule</button>
+            <button type="button" id="generateButton">
+                Generate Schedule
+            </button>
         </section>
 
+
+        <!-- 12 to 24 Hour Calculator -->
+        <section id="timeCalculator">
+            <h2>12-Hour to 24-Hour Converter</h2>
+
+            <label for="timeHour">Hour</label>
+            <input type="number" id="timeHour" min="1" max="12"
+                   placeholder="1-12">
+
+            <label for="timeMinute">Minute</label>
+            <input type="number" id="timeMinute" min="0" max="59"
+                   placeholder="0-59">
+
+            <label for="timePeriod">AM / PM</label>
+            <select id="timePeriod">
+                <option value="AM">AM</option>
+                <option value="PM">PM</option>
+            </select>
+
+            <button type="button" id="convertTimeButton">
+                Convert Time
+            </button>
+
+            <p id="time24Output">24-hour time will appear here.</p>
+        </section>
+
+
+        <!-- Generated Schedule -->
         <section id="results">
             <h2>Generated Schedule</h2>
 
@@ -48,11 +79,17 @@
                 Your schedule will appear here.
             </div>
 
+            <button type="button" id="exportScheduleButton" hidden>
+                Export Schedule (.txt)
+            </button>
+
             <button type="button" id="showSleepReportButton" hidden>
                 Open Daily Sleep Report
             </button>
         </section>
 
+
+        <!-- Daily Sleep Report -->
         <section id="sleepReport" hidden>
             <h2>Daily Sleep Report</h2>
 
@@ -80,18 +117,15 @@
                 <option value="great">Great</option>
             </select>
 
-            <label for="sleepNotes">Additional Notes (Optional)</label>
-            <textarea id="sleepNotes"
-                      placeholder="Record interruptions or other relevant observations."
-                      rows="3"></textarea>
-
             <button type="button" id="saveSleepReportButton">
                 Save Sleep Report
             </button>
 
             <div id="sleepReportStatus" aria-live="polite"></div>
         </section>
+
     </main>
+
 
     <script src="js/schedule.js"></script>
     <script src="js/storage.js"></script>
