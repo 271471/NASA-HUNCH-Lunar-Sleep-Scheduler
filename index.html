@@ -117,11 +117,57 @@
                 <option value="great">Great</option>
             </select>
 
+            <!-- Sleep Experience -->
+            <label for="sleptWell">Did you have a good night's sleep?</label>
+            <select id="sleptWell" required>
+                <option value="">Select an answer</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+            </select>
+
+            <!-- Reason for Poor Sleep -->
+            <div id="sleepProblemSection" hidden>
+
+                <label for="sleepProblem">
+                    Why didn't you sleep well?
+                </label>
+
+                <select id="sleepProblem">
+                    <option value="">Select a reason</option>
+                    <option value="trouble-falling-asleep">
+                        I was in bed but couldn't fall asleep
+                    </option>
+                    <option value="waking-during-night">
+                        I kept waking up during the night
+                    </option>
+                    <option value="woke-too-early">
+                        I woke up earlier than planned
+                    </option>
+                    <option value="too-alert">
+                        I felt too alert or restless
+                    </option>
+                    <option value="still-tired">
+                        I slept but still felt tired
+                    </option>
+                    <option value="other">
+                        Other reason
+                    </option>
+                </select>
+
+            </div>
+
             <button type="button" id="saveSleepReportButton">
                 Save Sleep Report
             </button>
 
             <div id="sleepReportStatus" aria-live="polite"></div>
+
+            <!-- Sleep Recommendations -->
+            <div id="sleepRecommendations" hidden aria-live="polite">
+                <h3>Genesis Recommendations</h3>
+                <div id="recommendationOutput"></div>
+            </div>
+
         </section>
 
     </main>
