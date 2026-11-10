@@ -1,4 +1,3 @@
-
 const generateButton = document.getElementById('generateButton');
 const scheduleOutput = document.getElementById('scheduleOutput');
 const currentBedtimeInput = document.getElementById('currentBedtime');
@@ -12,6 +11,7 @@ const exportScheduleButton = document.getElementById('exportScheduleButton');
 
 let currentSchedule = [];
 let currentShiftDirection = '';
+let scheduleStartDate = '';
 
 
 
@@ -42,6 +42,13 @@ function generateSchedule() {
 
         currentSchedule = schedule;
         currentShiftDirection = shiftDirection;
+        scheduleStartDate = getLocalDate();
+
+        saveGeneratedSchedule(
+            currentSchedule,
+            scheduleStartDate,
+            currentShiftDirection
+        );
 
         // Show the daily report and export buttons after generating a schedule
         showSleepReportButton.hidden = false;
@@ -177,6 +184,32 @@ function loadLatestSleepReport() {
 loadLatestSleepReport();
 
 
+// Restore the generated schedule so reports can still be compared after reopening Genesis
+function restoreGeneratedSchedule() {
+
+    const savedSchedule = getGeneratedSchedule();
+
+    if (
+        !savedSchedule ||
+        !Array.isArray(savedSchedule.schedule) ||
+        !savedSchedule.startDate
+    ) {
+        return;
+    }
+
+    currentSchedule = savedSchedule.schedule;
+    scheduleStartDate = savedSchedule.startDate;
+    currentShiftDirection = savedSchedule.shiftDirection || '';
+
+    displaySchedule(currentSchedule, currentShiftDirection);
+
+    showSleepReportButton.hidden = false;
+    exportScheduleButton.hidden = false;
+}
+
+restoreGeneratedSchedule();
+
+
 function validateTime(time) { //validates 24 hour format
 
     return /^([01]?\d|2[0-3]):[0-5]\d$/.test(time); //do not remember this look up regex (regular expression).
@@ -195,12 +228,91 @@ sleptWell.addEventListener('change', function() {
 });
 
 
-// Generate recommendations based on the reported sleep problem
-function displaySleepRecommendations(reason) {
+// Generate recommendations and feedback based on the sleep report and saved history
+function getCongratulatoryMessage(report) {
+
+    const fullScheduleMessages = [
+        'Good work staying on schedule!',
+        'Great consistency. You met your bedtime and wake-time targets.',
+        'Well done! You kept your sleep schedule on track.',
+        'Another successful sleep period. Keep up the consistency.',
+        'You followed your planned sleep schedule. Good work!'
+    ];
+
+    const bedtimeMessages = [
+        'Good work meeting your planned bedtime!',
+        'You went to bed on time. Keep building that consistency.',
+        'Well done! You met your bedtime target.',
+        'You stayed on track with your planned bedtime.'
+    ];
+
+    const messages = report.wakeTimeOnSchedule
+        ? fullScheduleMessages
+        : bedtimeMessages;
+
+    return messages[Math.floor(Math.random() * messages.length)];
+}
+
+
+function getDateDifference(startDate, endDate) {
+
+    const start = new Date(`${startDate}T00:00:00Z`);
+    const end = new Date(`${endDate}T00:00:00Z`);
+
+    return Math.round((end - start) / 86400000);
+}
+
+
+function getScheduledPeriodForDate(date) {
+
+    if (!scheduleStartDate || currentSchedule.length === 0) {
+        return null;
+    }
+
+    const dayNumber = getDateDifference(scheduleStartDate, date);
+
+    if (dayNumber < 0) {
+        return null;
+    }
+
+    return currentSchedule.find(
+        period => period.day === dayNumber
+    ) || null;
+}
+
+
+function getClockDifference(timeOne, timeTwo) {
+
+    const [hourOne, minuteOne] = timeOne.split(':').map(Number);
+    const [hourTwo, minuteTwo] = timeTwo.split(':').map(Number);
+
+    const minutesOne = hourOne * 60 + minuteOne;
+    const minutesTwo = hourTwo * 60 + minuteTwo;
+
+    const difference = Math.abs(minutesOne - minutesTwo);
+
+    return Math.min(difference, 1440 - difference);
+}
+
+
+function displaySleepRecommendations(reason, report, summary) {
 
     recommendationOutput.replaceChildren();
 
     const recommendations = [];
+
+    if (report.bedtimeOnSchedule === true) {
+        const congratulations = document.createElement('p');
+        congratulations.textContent = getCongratulatoryMessage(report);
+        congratulations.style.fontWeight = 'bold';
+        recommendationOutput.appendChild(congratulations);
+    }
+
+    if (report.onSchedule === false && report.bedtimeOnSchedule !== true) {
+        recommendations.push(
+            'Your sleep times were outside the schedule tolerance. Review the planned times and try to return to the schedule during the next sleep period.'
+        );
+    }
 
     if (reason === 'trouble-falling-asleep') {
 
@@ -288,27 +400,74 @@ function displaySleepRecommendations(reason) {
 
     }
 
+    if (report.sleptWell === 'no' || report.quality === 'poor') {
+        recommendations.push(
+            'If sleep difficulties continue, contact the appropriate mission medical personnel.'
+        );
+    }
 
-    recommendations.push(
-        'If sleep difficulties continue, contact the appropriate mission medical personnel.'
-    );
+    // Review every saved report, not just a fixed number of recent days
+    if (summary.scheduleReportCount >= 3) {
 
+        const adherencePercent = Math.round(summary.adherenceRate * 100);
 
-    const list = document.createElement('ul');
+        if (summary.adherenceRate >= 0.8) {
+            recommendations.push(
+                `You followed your planned schedule in ${summary.onScheduleCount} of ${summary.scheduleReportCount} recorded sleep periods (${adherencePercent}%). Your consistency is strong.`
+            );
+        } else if (summary.adherenceRate < 0.5) {
+            recommendations.push(
+                `Your reports show that schedule timing has been difficult: ${summary.onScheduleCount} of ${summary.scheduleReportCount} recorded sleep periods were within the target. Review whether the current schedule is realistic.`
+            );
+        } else {
+            recommendations.push(
+                `You followed the planned timing in ${summary.onScheduleCount} of ${summary.scheduleReportCount} recorded sleep periods. Continue working toward more consistent timing.`
+            );
+        }
+    }
 
-    recommendations.forEach(function(recommendation) {
+    if (summary.totalReports >= 3) {
 
-        const item = document.createElement('li');
-        item.textContent = recommendation;
-        list.appendChild(item);
+        const poorSleepPercent =
+            Math.round((summary.poorSleepCount / summary.totalReports) * 100);
 
-    });
+        if (poorSleepPercent >= 40) {
+            recommendations.push(
+                `Your saved reports show sleep difficulties in ${summary.poorSleepCount} of ${summary.totalReports} reports (${poorSleepPercent}%). Consider reviewing the schedule with mission medical personnel.`
+            );
+        } else if (summary.poorSleepCount === 0) {
+            recommendations.push(
+                'Your saved reports show no recorded poor-sleep periods. Keep monitoring your sleep quality.'
+            );
+        }
+    }
 
-    recommendationOutput.appendChild(list);
-    sleepRecommendations.hidden = false;
+    if (recommendations.length === 0 &&
+        report.onSchedule !== true &&
+        summary.totalReports < 3) {
+        recommendations.push(
+            'Continue recording your sleep reports so Genesis can identify patterns over time.'
+        );
+    }
 
+    if (recommendations.length > 0) {
+
+        const list = document.createElement('ul');
+
+        recommendations.forEach(function(recommendation) {
+
+            const item = document.createElement('li');
+            item.textContent = recommendation;
+            list.appendChild(item);
+
+        });
+
+        recommendationOutput.appendChild(list);
+    }
+
+    sleepRecommendations.hidden =
+        recommendationOutput.childElementCount === 0;
 }
-
 
 
 // Save nightly sleep report
@@ -353,6 +512,40 @@ saveSleepReportButton.addEventListener('click', function() { // trys report
             throw new Error('Invalid sleep duration.');
         }
 
+        const requiredSleepHoursInput =
+            Number(document.getElementById('sleepHours').value);
+
+        const requiredSleepHours =
+            Number.isFinite(requiredSleepHoursInput) &&
+            requiredSleepHoursInput > 0 &&
+            requiredSleepHoursInput <= 24
+                ? requiredSleepHoursInput
+                : null;
+
+        const plannedPeriod = getScheduledPeriodForDate(date);
+        const adherenceToleranceMinutes = 15;
+
+        let plannedBedtime = null;
+        let plannedWakeTime = null;
+        let bedtimeOnSchedule = null;
+        let wakeTimeOnSchedule = null;
+        let onSchedule = null;
+
+        if (plannedPeriod) {
+            plannedBedtime = plannedPeriod.bedtime;
+            plannedWakeTime = plannedPeriod.wakeTime;
+
+            bedtimeOnSchedule =
+                getClockDifference(bedtime, plannedBedtime) <=
+                adherenceToleranceMinutes;
+
+            wakeTimeOnSchedule =
+                getClockDifference(wakeTime, plannedWakeTime) <=
+                adherenceToleranceMinutes;
+
+            onSchedule = bedtimeOnSchedule && wakeTimeOnSchedule;
+        }
+
         const report = {
             date: date,
             bedtime: bedtime,
@@ -361,6 +554,13 @@ saveSleepReportButton.addEventListener('click', function() { // trys report
             quality: quality,
             sleptWell: sleptWellAnswer,
             sleepProblem: sleptWellAnswer === 'no' ? problem : '',
+            requiredSleepHours: requiredSleepHours,
+            plannedBedtime: plannedBedtime,
+            plannedWakeTime: plannedWakeTime,
+            adherenceToleranceMinutes: adherenceToleranceMinutes,
+            bedtimeOnSchedule: bedtimeOnSchedule,
+            wakeTimeOnSchedule: wakeTimeOnSchedule,
+            onSchedule: onSchedule,
             loggedAt: new Date().toISOString()
         };
 
@@ -374,19 +574,29 @@ saveSleepReportButton.addEventListener('click', function() { // trys report
 
         // Display confirmation
         if (scheduleUpdated) {
+            const adherenceMessage = report.onSchedule === null
+                ? ' No matching scheduled period was available for comparison.'
+                : report.onSchedule
+                    ? ' You met the planned bedtime and wake-time targets.'
+                    : report.bedtimeOnSchedule
+                        ? ' You met your planned bedtime, but not your wake-time target.'
+                        : ' Your actual bedtime was outside the 15-minute schedule tolerance.';
+
             sleepReportStatus.textContent =
-                `Report saved. Actual sleep: ${duration.toFixed(2)} hours. Schedule updated using your reported bedtime.`;
+                `Report saved. Actual sleep: ${duration.toFixed(2)} hours. Schedule updated using your reported bedtime.${adherenceMessage}`;
         } else {
             sleepReportStatus.textContent =
                 `Report saved. Actual sleep: ${duration.toFixed(2)} hours. Your starting bedtime was updated, but the schedule could not be regenerated.`;
         }
 
-        // Display recommendations if the user did not sleep well
-        sleepRecommendations.hidden = true;
+        // Display feedback using the complete saved sleep history
+        const feedbackSummary = getSleepFeedbackSummary(requiredSleepHours);
 
-        if (sleptWellAnswer === 'no') {
-            displaySleepRecommendations(problem);
-        }
+        displaySleepRecommendations(
+            sleptWellAnswer === 'no' ? problem : '',
+            report,
+            feedbackSummary
+        );
 
         // Clear report fields for the next entry
         actualBedtime.value = '';
