@@ -1,48 +1,34 @@
-
 table {
     border-collapse: collapse;
     width: 100%;
-    color: white;
 }
 
 th, td {
-    border: 1px solid #6f49ab;
+    border: 1px solid black;
     padding: 10px;
     text-align: center;
-    color: white;
 }
 
 .linear-basic {
-    background: linear-gradient(135deg, #354A85, #351B78);
+    background: linear-gradient(135deg, #0B1D3A, #020617);
 }
 
 input,
 select {
-    background: linear-gradient(135deg, #858E9C, #80828B);
+    background: solid #7c78fa;
     color: white;
-    border: 1px solid #6f49ab;
+    border: 1px solid #526580;
     border-radius: 4px;
     padding: 8px;
 }
 
 body {
     font-family: Arial, sans-serif;
-    color: white;
 }
 
 .title {
     font-family: system-ui, sans-serif;
     text-align: center;
-    color: white;
-}
-
-button {
-    background-color: #dbe36f;
-    color: #020617;
-    border: 1px solid #dbe36f;
-    border-radius: 4px;
-    padding: 10px 16px;
-    cursor: pointer;
 }
 
 [hidden] {
