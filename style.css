@@ -2,12 +2,14 @@
 table {
     border-collapse: collapse;
     width: 100%;
+    color: white;
 }
 
 th, td {
-    border: 1px solid black;
+    border: 1px solid #6f49ab;
     padding: 10px;
     text-align: center;
+    color: white;
 }
 
 .linear-basic {
@@ -18,18 +20,29 @@ input,
 select {
     background: linear-gradient(135deg, #858E9C, #80828B);
     color: white;
-    border: 1px solid #526580;
+    border: 1px solid #6f49ab;
     border-radius: 4px;
     padding: 8px;
 }
 
 body {
     font-family: Arial, sans-serif;
+    color: white;
 }
 
 .title {
     font-family: system-ui, sans-serif;
     text-align: center;
+    color: white;
+}
+
+button {
+    background: linear-gradient(135deg, #6f49ab, #0B1D3A);
+    color: white;
+    border: 1px solid #6f49ab;
+    border-radius: 4px;
+    padding: 10px 16px;
+    cursor: pointer;
 }
 
 [hidden] {
