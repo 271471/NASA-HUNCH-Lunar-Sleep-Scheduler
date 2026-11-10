@@ -13,7 +13,7 @@ th, td {
 }
 
 .linear-basic {
-    background: linear-gradient(135deg, #516cb5, #532ab5);
+    background: linear-gradient(135deg, #354A85, #351B78);
 }
 
 input,
@@ -37,9 +37,9 @@ body {
 }
 
 button {
-    background: linear-gradient(135deg, #6f49ab, #0B1D3A);
-    color: white;
-    border: 1px solid #6f49ab;
+    background-color: #dbe36f;
+    color: #020617;
+    border: 1px solid #dbe36f;
     border-radius: 4px;
     padding: 10px 16px;
     cursor: pointer;
